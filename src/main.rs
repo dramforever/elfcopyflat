@@ -11,7 +11,7 @@ use elf::Phdr;
 
 mod elf;
 
-/// elfcopy: Copy loadable segments in an ELF file to a flat binary
+/// elfcopyflat: Copy loadable segments in an ELF file to a flat binary
 #[derive(Debug, Parser)]
 struct Args {
     /// Only copy segments with these flags (among "rwx")
