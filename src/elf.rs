@@ -317,20 +317,22 @@ pub struct Phdr(pub Phdr64<NativeEndian>);
 impl Phdr {
     pub fn from_bytes(data: &[u8], ehdr: &Ehdr) -> Self {
         let res = match (ehdr.0.e_ident.class, ehdr.0.e_ident.data) {
-            (Class::ELFCLASS32, Data::ELFDATA2LSB) => <Phdr32<LittleEndian>>::read_from(data)
-                .expect("Invalid ELF header slipped through")
-                .wrap(),
-            (Class::ELFCLASS64, Data::ELFDATA2LSB) => <Phdr64<LittleEndian>>::read_from(data)
-                .expect("Invalid ELF header slipped through")
-                .wrap(),
-            (Class::ELFCLASS32, Data::ELFDATA2MSB) => <Phdr32<BigEndian>>::read_from(data)
-                .expect("Invalid ELF header slipped through")
-                .wrap(),
-            (Class::ELFCLASS64, Data::ELFDATA2MSB) => <Phdr64<BigEndian>>::read_from(data)
-                .expect("Invalid ELF header slipped through")
-                .wrap(),
-            _ => panic!("Invalid ELF header slipped through"),
+            (Class::ELFCLASS32, Data::ELFDATA2LSB) => {
+                <Phdr32<LittleEndian>>::read_from(data).map(|x| x.wrap())
+            }
+            (Class::ELFCLASS64, Data::ELFDATA2LSB) => {
+                <Phdr64<LittleEndian>>::read_from(data).map(|x| x.wrap())
+            }
+            (Class::ELFCLASS32, Data::ELFDATA2MSB) => {
+                <Phdr32<BigEndian>>::read_from(data).map(|x| x.wrap())
+            }
+            (Class::ELFCLASS64, Data::ELFDATA2MSB) => {
+                <Phdr64<BigEndian>>::read_from(data).map(|x| x.wrap())
+            }
+            _ => None,
         };
+
+        let res = res.expect("Invalid ELF header slipped through");
 
         Self(res)
     }
