@@ -103,7 +103,7 @@ fn main() -> anyhow::Result<()> {
 
     let is_empty = phdrs.iter().all(|phdr| phdr.file_size() == 0);
 
-    if is_empty && ! args.allow_empty {
+    if is_empty && !args.allow_empty {
         bail!("Empty output file (Use --allow-empty to create one anyway)")
     }
 
