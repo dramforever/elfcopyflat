@@ -26,6 +26,10 @@ struct Args {
     #[arg(long, value_name = "ADDRESS", value_parser=maybe_hex::<u64>)]
     base: Option<u64>,
 
+    /// Allow empty output file
+    #[arg(long)]
+    allow_empty: bool,
+
     /// Allow overlapping segments
     #[arg(long)]
     allow_overlaps: bool,
@@ -63,7 +67,6 @@ fn parse_flags(s: &str) -> Result<u32, String> {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let mut input_file = File::open(&args.input)?;
-    let mut output_file = File::create(&args.output)?;
 
     let ehdr = elf::Ehdr::read(&mut input_file)?;
     let mut phdr_bytes: Vec<u8> = vec![0; ehdr.ph_size()];
@@ -97,6 +100,14 @@ fn main() -> anyhow::Result<()> {
             );
         }
     }
+
+    let is_empty = phdrs.iter().all(|phdr| phdr.file_size() == 0);
+
+    if is_empty && ! args.allow_empty {
+        bail!("Empty output file (Use --allow-empty to create one anyway)")
+    }
+
+    let mut output_file = File::create(&args.output)?;
 
     let overlaps = phdrs
         .iter()
