@@ -131,9 +131,15 @@ fn main() -> anyhow::Result<()> {
         bail!("Overlapping segments (Use --allow-overlaps to use it anyway)")
     }
 
-    let base = args
-        .base
-        .unwrap_or_else(|| phdrs.iter().map(|phdr| phdr.address()).min().unwrap_or(0));
+    let min_addr = phdrs.iter().map(|phdr| phdr.address()).min();
+
+    if let Some((base, min_addr)) = args.base.zip(min_addr) {
+        if base > min_addr {
+            bail!("Segments start at {min_addr:#x}, which is less than specified base {base:#x}")
+        }
+    }
+
+    let base = args.base.or(min_addr).unwrap_or(0);
 
     if args.verbose {
         eprintln!("Base address {base:#x}")
