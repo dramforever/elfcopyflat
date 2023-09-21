@@ -159,7 +159,7 @@ impl<O: ByteOrder, UN: FromBytes + Into<u64>> EhdrN<O, UN> {
         };
 
         if usize::from(self.e_phentsize.get()) != phentsize {
-            bail!("Invalid e_phentsize")
+            bail!("Invalid e_phentsize, file is probably not an executable")
         }
 
         if self.e_phnum.get() == u16::MAX {
